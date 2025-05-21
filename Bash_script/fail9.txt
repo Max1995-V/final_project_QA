@@ -1,1 +1,36 @@
-sjdfn
+#!/bin/bash
+
+# Скрипт для автоматического обновления Git-репозитория
+# Использование: ./git-auto-push.sh "Ваше сообщение коммита"
+
+# Проверка, что это Git-репозиторий
+if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+    echo "❌ Ошибка: Это не Git-репозиторий!"
+    exit 1
+fi
+
+# Определение текущей ветки
+CURRENT_BRANCH=$(git branch --show-current)
+
+# Добавление всех изменений
+git add .
+
+# Проверка наличия изменений
+if git diff --cached --quiet; then
+    echo "⚠️ Нет изменений для коммита"
+    exit 0
+fi
+
+# Сообщение коммита
+COMMIT_MSG=${1:-"Automatic commit: $(date +'%Y-%m-%d %H:%M:%S')"}
+
+# Создание коммита
+git commit -m "$COMMIT_MSG"
+
+# Push изменений
+if git push origin "$CURRENT_BRANCH"; then
+    echo -e "\n✅ Успешно! Изменения отправлены в ветку: $CURRENT_BRANCH"
+else
+    echo -e "\n❌ Ошибка при отправке изменений!"
+    exit 1
+fi
